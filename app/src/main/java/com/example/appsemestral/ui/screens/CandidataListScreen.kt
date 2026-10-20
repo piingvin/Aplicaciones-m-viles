@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,7 +22,8 @@ import com.example.appsemestral.ui.viewmodel.CandidataListViewModel
 @Composable
 fun CandidataListScreen(
     viewModel: CandidataListViewModel,
-    onAgregarClick: () -> Unit
+    onAgregarClick: () -> Unit,
+    onEditarClick: (Candidata) -> Unit
 ) {
     val candidatas by viewModel.candidatas.collectAsState()
 
@@ -63,10 +65,10 @@ fun CandidataListScreen(
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
                 items(candidatas) { candidata ->
-                    // Aquí llamamos a la tarjeta y le pasamos la acción de borrar
                     CandidataCard(
                         candidata = candidata,
-                        onEliminar = { viewModel.eliminarCandidata(candidata) }
+                        onEliminar = { viewModel.eliminarCandidata(candidata) },
+                        onEditar = { onEditarClick(candidata) }
                     )
                 }
             }
@@ -75,7 +77,7 @@ fun CandidataListScreen(
 }
 
 @Composable
-fun CandidataCard(candidata: Candidata, onEliminar: () -> Unit) {
+fun CandidataCard(candidata: Candidata, onEliminar: () -> Unit, onEditar: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -112,14 +114,21 @@ fun CandidataCard(candidata: Candidata, onEliminar: () -> Unit) {
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-
-            // Botón de eliminar (Basurero)
-            IconButton(onClick = onEliminar) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar",
-                    tint = MaterialTheme.colorScheme.error
-                )
+            Row {
+                IconButton(onClick = onEditar) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Editar",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onEliminar) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Eliminar",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }

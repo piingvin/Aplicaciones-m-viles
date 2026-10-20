@@ -64,6 +64,10 @@ class MainActivity : FragmentActivity() {
                                     onAgregarClick = {
                                         formViewModel.limpiarFormulario()
                                         pantallaActual = "formulario"
+                                    },
+                                    onEditarClick = { candidataSeleccionada ->
+                                        formViewModel.cargarCandidata(candidataSeleccionada) // Carga los datos existentes
+                                        pantallaActual = "formulario" // Abre el form
                                     }
                                 )
                             }

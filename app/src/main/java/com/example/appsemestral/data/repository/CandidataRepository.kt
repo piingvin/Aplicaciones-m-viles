@@ -23,4 +23,8 @@ class CandidataRepository(private val candidataDao: CandidataDao) {
     suspend fun eliminarCandidata(candidata: Candidata) {
         candidataDao.eliminar(candidata)
     }
+
+    suspend fun actualizarCandidata(candidata: Candidata) {
+        candidataDao.actualizar(candidata)
+    }
 }

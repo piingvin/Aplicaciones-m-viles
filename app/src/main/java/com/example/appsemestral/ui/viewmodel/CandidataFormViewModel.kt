@@ -34,6 +34,8 @@ class CandidataFormViewModel(
     private val _resumen = MutableStateFlow(CampoState())
     val resumen: StateFlow<CampoState> = _resumen.asStateFlow()
 
+    private var idActual: Int = 0
+
     fun onNombreChange(nuevoValor: String) {
         val resultado = CandidataValidator.validarNombre(nuevoValor)
         _nombre.update { it.con(nuevoValor, resultado) }
@@ -62,7 +64,18 @@ class CandidataFormViewModel(
         _resumen.update { it.copy(valor = nuevoValor, error = if (nuevoValor.isBlank()) "Ingrese un resumen" else null) }
     }
 
+    fun cargarCandidata(candidata: Candidata) {
+        idActual = candidata.id
+        _nombre.value = CampoState(valor = candidata.nombre)
+        _correo.value = CampoState(valor = candidata.correo)
+        _telefono.value = CampoState(valor = candidata.telefono)
+        _area.value = CampoState(valor = candidata.area)
+        _experiencia.value = CampoState(valor = candidata.anosExperiencia.toString())
+        _resumen.value = CampoState(valor = candidata.resumen)
+    }
+
     fun limpiarFormulario() {
+        idActual = 0
         _nombre.value = CampoState()
         _correo.value = CampoState()
         _telefono.value = CampoState()
@@ -88,7 +101,8 @@ class CandidataFormViewModel(
 
         if (sinErrores && camposLlenos) {
             viewModelScope.launch {
-                val nuevaCandidata = Candidata(
+                val candidata = Candidata(
+                    id = idActual,
                     nombre = _nombre.value.valor,
                     correo = _correo.value.valor,
                     telefono = _telefono.value.valor,
@@ -99,7 +113,11 @@ class CandidataFormViewModel(
                     uriCv = "",
                     registradaPor = "Dirección"
                 )
-                repository.registrarCandidata(nuevaCandidata)
+                if (idActual == 0) {
+                    repository.registrarCandidata(candidata) // Es nueva
+                } else {
+                    repository.actualizarCandidata(candidata) // Es edición
+                }
                 onExito()
             }
         }
