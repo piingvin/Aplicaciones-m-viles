@@ -1,0 +1,9 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="AndroidLintDuplicateIds" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="AndroidLintSuspiciousImport" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="EmptyDeclOrStmt" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="KotlinBigDecimalEquals" enabled="false" level="WARNING" enabled_by_default="false" />
+  </profile>
+</component>
