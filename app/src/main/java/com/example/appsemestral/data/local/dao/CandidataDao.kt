@@ -1,6 +1,7 @@
 package com.example.appsemestral.data.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -20,4 +21,7 @@ interface CandidataDao {
 
     @Update
     suspend fun actualizar(candidata: Candidata)
+
+    @Delete
+    suspend fun eliminar(candidata: Candidata)
 }

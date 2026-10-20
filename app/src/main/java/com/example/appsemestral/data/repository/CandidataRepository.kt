@@ -19,4 +19,8 @@ class CandidataRepository(private val candidataDao: CandidataDao) {
         // pero por ahora solo haremos la inserción básica.
         return candidataDao.insertar(candidata)
     }
+
+    suspend fun eliminarCandidata(candidata: Candidata) {
+        candidataDao.eliminar(candidata)
+    }
 }

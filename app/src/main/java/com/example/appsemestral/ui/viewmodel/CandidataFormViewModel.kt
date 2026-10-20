@@ -62,6 +62,15 @@ class CandidataFormViewModel(
         _resumen.update { it.copy(valor = nuevoValor, error = if (nuevoValor.isBlank()) "Ingrese un resumen" else null) }
     }
 
+    fun limpiarFormulario() {
+        _nombre.value = CampoState()
+        _correo.value = CampoState()
+        _telefono.value = CampoState()
+        _area.value = CampoState()
+        _experiencia.value = CampoState()
+        _resumen.value = CampoState()
+    }
+
     fun guardarCandidata(onExito: () -> Unit) {
         // Validar antes de guardar
         onNombreChange(_nombre.value.valor)
