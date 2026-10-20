@@ -1,14 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("org.jetbrains.kotlin.android") // SIN escribir versión aquí
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp") version "2.0.21-1.0.28"
 }
 
 android {
-    namespace = "com.example.app_kotlin"
+    namespace = "com.example.appsemestral"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.example.app_kotlin"
+        applicationId = "com.example.appsemestral"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -50,8 +52,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
     // Room para la base de datos
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
 }
