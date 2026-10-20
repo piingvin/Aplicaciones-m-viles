@@ -1,6 +1,8 @@
 package com.example.appsemestral.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -18,16 +20,20 @@ fun CandidataFormScreen(
     viewModel: CandidataFormViewModel,
     onVolver: () -> Unit
 ) {
-    // Observamos los estados desde el ViewModel
     val nombreState by viewModel.nombre.collectAsState()
     val correoState by viewModel.correo.collectAsState()
+    val telefonoState by viewModel.telefono.collectAsState()
+    val areaState by viewModel.area.collectAsState()
+    val experienciaState by viewModel.experiencia.collectAsState()
+    val resumenState by viewModel.resumen.collectAsState()
 
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .padding(16.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
@@ -49,10 +55,36 @@ fun CandidataFormScreen(
                 error = correoState.error
             )
 
+            CampoValidado(
+                valor = telefonoState.valor,
+                onValorChange = { viewModel.onTelefonoChange(it) },
+                label = "Teléfono (+56 9 XXXX XXXX)",
+                error = telefonoState.error
+            )
+
+            CampoValidado(
+                valor = areaState.valor,
+                onValorChange = { viewModel.onAreaChange(it) },
+                label = "Área (Ej: Desarrollo, UI/UX)",
+                error = areaState.error
+            )
+
+            CampoValidado(
+                valor = experienciaState.valor,
+                onValorChange = { viewModel.onExperienciaChange(it) },
+                label = "Años de Experiencia",
+                error = experienciaState.error
+            )
+
+            CampoValidado(
+                valor = resumenState.valor,
+                onValorChange = { viewModel.onResumenChange(it) },
+                label = "Resumen del perfil",
+                error = resumenState.error
+            )
+
             Button(
-                onClick = {
-                    viewModel.guardarCandidata(onExito = onVolver)
-                },
+                onClick = { viewModel.guardarCandidata(onExito = onVolver) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Guardar Candidatura")

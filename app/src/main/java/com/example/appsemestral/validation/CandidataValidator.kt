@@ -9,20 +9,22 @@ sealed class ValidationResult {
 object CandidataValidator {
 
     fun validarNombre(nombre: String): ValidationResult {
-        if (nombre.isBlank()) return ValidationResult.Error("El nombre no puede estar vacío")
-        if (nombre.length !in 3..60) return ValidationResult.Error("Debe tener entre 3 y 60 caracteres")
-        if (!nombre.contains(" ")) return ValidationResult.Error("Debe incluir nombre y apellido")
-        return ValidationResult.Valido
+        return when {
+            nombre.isBlank() -> ValidationResult.Error("El nombre no puede estar vacío")
+            nombre.length < 3 -> ValidationResult.Error("Debe tener al menos 3 caracteres")
+            else -> ValidationResult.Valido
+        }
     }
 
     fun validarCorreo(correo: String): ValidationResult {
-        if (correo.isBlank()) return ValidationResult.Error("El correo es obligatorio")
-        val dominiosPermitidos = listOf("ejemplo.cl", "example.com", "test.cl")
-        val dominio = correo.substringAfter('@', "")
-        if (dominio !in dominiosPermitidos) {
-            return ValidationResult.Error("Dominio no permitido (use ejemplo.cl, example.com o test.cl)")
+        // Expresión regular estándar para correos generales (Gmail, Duoc, etc.)
+        val regexCorreo = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}\$".toRegex()
+
+        return when {
+            correo.isBlank() -> ValidationResult.Error("El correo no puede estar vacío")
+            !correo.matches(regexCorreo) -> ValidationResult.Error("Ingrese un correo electrónico válido")
+            else -> ValidationResult.Valido
         }
-        return ValidationResult.Valido
     }
 
     fun validarTelefono(telefono: String): ValidationResult {
