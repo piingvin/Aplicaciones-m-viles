@@ -2,6 +2,8 @@ package com.example.appsemestral.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,10 +14,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 import com.example.appsemestral.ui.components.CampoValidado
 import com.example.appsemestral.ui.viewmodel.CandidataFormViewModel
 import com.example.appsemestral.util.FilePickerUtils
@@ -26,6 +33,19 @@ fun CandidataFormScreen(
     onVolver: () -> Unit
 ) {
     val context = LocalContext.current
+
+    // Animación: el botón "tiembla" cuando el formulario tiene errores
+    val scope = rememberCoroutineScope()
+    val sacudida = remember { Animatable(0f) }
+    val sacudirBoton: () -> Unit = {
+        scope.launch {
+            repeat(3) {
+                sacudida.animateTo(14f, tween(45))
+                sacudida.animateTo(-14f, tween(45))
+            }
+            sacudida.animateTo(0f, tween(45))
+        }
+    }
 
     val nombreState by viewModel.nombre.collectAsState()
     val correoState by viewModel.correo.collectAsState()
@@ -158,11 +178,14 @@ fun CandidataFormScreen(
             }
 
             Button(
-                onClick = { viewModel.guardarCandidata(onExito = onVolver) },
-                modifier = Modifier.fillMaxWidth()
+                onClick = { viewModel.guardarCandidata(onExito = onVolver, onError = sacudirBoton) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset { IntOffset(sacudida.value.roundToInt(), 0) }
             ) {
                 Text("Guardar Candidatura")
             }
         }
     }
 }
+

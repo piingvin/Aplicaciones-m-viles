@@ -99,7 +99,7 @@ class CandidataFormViewModel(
         _nombreCv.value = null
     }
 
-    fun guardarCandidata(onExito: () -> Unit) {
+    fun guardarCandidata(onExito: () -> Unit, onError: () -> Unit = {}) {
         // Validar antes de guardar
         onNombreChange(_nombre.value.valor)
         onCorreoChange(_correo.value.valor)
@@ -135,6 +135,8 @@ class CandidataFormViewModel(
                 }
                 onExito()
             }
+        } else {
+            onError() // avisa a la pantalla para que anime el botón
         }
     }
 }
