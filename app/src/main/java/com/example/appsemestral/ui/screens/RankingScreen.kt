@@ -4,6 +4,8 @@ package com.example.appsemestral.ui.screens
  * Pantalla de Ranking Consolidado WIM
  * Muestra a las candidatas evaluadas ordenadas descendentemente por su puntaje total ponderado.
  */
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -15,6 +17,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,10 +75,11 @@ fun RankingScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
-                itemsIndexed(ranking) { index, evaluacion ->
+                itemsIndexed(ranking, key = { _, e -> e.id }) { index, evaluacion ->
                     RankingCardItem(
                         posicion = index + 1,
-                        evaluacion = evaluacion
+                        evaluacion = evaluacion,
+                        modifier = Modifier.animateItem() // las tarjetas se reordenan con animación
                     )
                 }
             }
@@ -83,7 +90,8 @@ fun RankingScreen(
 @Composable
 fun RankingCardItem(
     posicion: Int,
-    evaluacion: Evaluacion
+    evaluacion: Evaluacion,
+    modifier: Modifier = Modifier
 ) {
     val (medallaColor, podioTexto) = when (posicion) {
         1 -> Color(0xFFFFD700) to "🥇 1° LUGAR"
@@ -93,7 +101,7 @@ fun RankingCardItem(
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = if (posicion <= 3) 4.dp else 1.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (posicion == 1) MaterialTheme.colorScheme.primaryContainer
@@ -150,6 +158,19 @@ fun RankingCardItem(
                 text = evaluacion.candidataNombre,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
+            )
+
+            // Barra de puntaje que crece al aparecer la tarjeta
+            var visible by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) { visible = true }
+            val progreso by animateFloatAsState(
+                targetValue = if (visible) (evaluacion.totalPonderado / 5.0).toFloat().coerceIn(0f, 1f) else 0f,
+                animationSpec = tween(900),
+                label = "progresoRanking"
+            )
+            LinearProgressIndicator(
+                progress = { progreso },
+                modifier = Modifier.fillMaxWidth()
             )
 
             Row(
