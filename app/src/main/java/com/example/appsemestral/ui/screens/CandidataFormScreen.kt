@@ -1,31 +1,49 @@
 package com.example.appsemestral.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.appsemestral.ui.components.CampoValidado
 import com.example.appsemestral.ui.viewmodel.CandidataFormViewModel
+import com.example.appsemestral.util.FilePickerUtils
 
 @Composable
 fun CandidataFormScreen(
     viewModel: CandidataFormViewModel,
     onVolver: () -> Unit
 ) {
+    val context = LocalContext.current
+
     val nombreState by viewModel.nombre.collectAsState()
     val correoState by viewModel.correo.collectAsState()
     val telefonoState by viewModel.telefono.collectAsState()
     val areaState by viewModel.area.collectAsState()
     val experienciaState by viewModel.experiencia.collectAsState()
     val resumenState by viewModel.resumen.collectAsState()
+    val nombreCv by viewModel.nombreCv.collectAsState()
+
+    // Selector nativo de archivos (ej: PDF, DOC, etc.)
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            val nombreArchivo = FilePickerUtils.obtenerNombreArchivo(context, uri)
+            viewModel.onCvSeleccionado(uri.toString(), nombreArchivo)
+        }
+    }
 
     Scaffold { paddingValues ->
         Column(
@@ -82,6 +100,62 @@ fun CandidataFormScreen(
                 label = "Resumen del perfil",
                 error = resumenState.error
             )
+
+            // Sección para Adjuntar Curriculum Vitae (CV)
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Curriculum Vitae (CV)",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    if (nombreCv != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.CheckCircle,
+                                contentDescription = "CV Adjunto",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Adjuntado: $nombreCv",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "No se ha adjuntado ningún archivo CV.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = { filePickerLauncher.launch("*/*") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.AttachFile,
+                            contentDescription = "Adjuntar CV"
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(if (nombreCv == null) "Adjuntar Documento CV" else "Cambiar Documento CV")
+                    }
+                }
+            }
 
             Button(
                 onClick = { viewModel.guardarCandidata(onExito = onVolver) },

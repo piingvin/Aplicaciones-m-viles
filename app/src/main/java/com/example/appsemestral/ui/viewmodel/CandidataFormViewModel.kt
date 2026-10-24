@@ -34,6 +34,12 @@ class CandidataFormViewModel(
     private val _resumen = MutableStateFlow(CampoState())
     val resumen: StateFlow<CampoState> = _resumen.asStateFlow()
 
+    private val _uriCv = MutableStateFlow<String>("")
+    val uriCv: StateFlow<String> = _uriCv.asStateFlow()
+
+    private val _nombreCv = MutableStateFlow<String?>(null)
+    val nombreCv: StateFlow<String?> = _nombreCv.asStateFlow()
+
     private var idActual: Int = 0
 
     fun onNombreChange(nuevoValor: String) {
@@ -64,6 +70,11 @@ class CandidataFormViewModel(
         _resumen.update { it.copy(valor = nuevoValor, error = if (nuevoValor.isBlank()) "Ingrese un resumen" else null) }
     }
 
+    fun onCvSeleccionado(uri: String, nombreArchivo: String?) {
+        _uriCv.value = uri
+        _nombreCv.value = nombreArchivo ?: "CV_Adjuntado.pdf"
+    }
+
     fun cargarCandidata(candidata: Candidata) {
         idActual = candidata.id
         _nombre.value = CampoState(valor = candidata.nombre)
@@ -72,6 +83,8 @@ class CandidataFormViewModel(
         _area.value = CampoState(valor = candidata.area)
         _experiencia.value = CampoState(valor = candidata.anosExperiencia.toString())
         _resumen.value = CampoState(valor = candidata.resumen)
+        _uriCv.value = candidata.uriCv
+        _nombreCv.value = if (candidata.uriCv.isNotBlank()) "CV Guardado" else null
     }
 
     fun limpiarFormulario() {
@@ -82,6 +95,8 @@ class CandidataFormViewModel(
         _area.value = CampoState()
         _experiencia.value = CampoState()
         _resumen.value = CampoState()
+        _uriCv.value = ""
+        _nombreCv.value = null
     }
 
     fun guardarCandidata(onExito: () -> Unit) {
@@ -110,7 +125,7 @@ class CandidataFormViewModel(
                     anosExperiencia = _experiencia.value.valor.toIntOrNull() ?: 0,
                     resumen = _resumen.value.valor,
                     enlacePerfil = "",
-                    uriCv = "",
+                    uriCv = _uriCv.value,
                     registradaPor = "Dirección"
                 )
                 if (idActual == 0) {

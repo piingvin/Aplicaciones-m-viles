@@ -6,5 +6,11 @@ import com.example.appsemestral.data.repository.CandidataRepository
 
 class AppContainer(private val context: Context) {
     val database by lazy { WimDatabase.obtener(context) }
-    val candidataRepository by lazy { CandidataRepository(database.candidataDao()) }
+    val candidataRepository by lazy {
+        CandidataRepository(
+            database.candidataDao(),
+            database.evaluacionDao(),
+            database.historialDao()
+        )
+    }
 }
