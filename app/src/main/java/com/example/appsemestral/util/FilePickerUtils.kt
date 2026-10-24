@@ -25,11 +25,7 @@ object FilePickerUtils {
         }
 
         if (nombre == null) {
-            nombre = uri.path
-            val corte = nombre?.lastIndexOf('/')
-            if (corte != null && corte != -1) {
-                nombre = nombre.substring(corte + 1)
-            }
+            nombre = uri.path?.substringAfterLast('/')
         }
 
         return nombre
