@@ -1,5 +1,9 @@
 package com.example.appsemestral.ui.screens
 
+/**
+ * Pantalla de Ranking Consolidado WIM
+ * Muestra a las candidatas evaluadas ordenadas descendentemente por su puntaje total ponderado.
+ */
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed

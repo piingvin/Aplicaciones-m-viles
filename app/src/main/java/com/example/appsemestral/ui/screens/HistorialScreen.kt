@@ -1,5 +1,9 @@
 package com.example.appsemestral.ui.screens
 
+/**
+ * Pantalla de Trazabilidad e Historial WIM
+ * Muestra el registro de auditoria de todas las acciones realizadas en la aplicacion.
+ */
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
