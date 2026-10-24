@@ -2,22 +2,28 @@ package com.example.appsemestral
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.setContent
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import com.example.appsemestral.ui.screens.CandidataFormScreen
-import com.example.appsemestral.ui.screens.CandidataListScreen
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.appsemestral.ui.WimApp
+import com.example.appsemestral.ui.theme.AppKotlinTheme
 import com.example.appsemestral.ui.viewmodel.CandidataFormViewModel
 import com.example.appsemestral.ui.viewmodel.CandidataListViewModel
+import com.example.appsemestral.ui.viewmodel.EvaluacionViewModel
+import com.example.appsemestral.ui.viewmodel.RankingHistorialViewModel
 import java.util.concurrent.Executor
 
 class MainActivity : FragmentActivity() {
@@ -26,61 +32,48 @@ class MainActivity : FragmentActivity() {
     private lateinit var biometricPrompt: BiometricPrompt
     private lateinit var promptInfo: BiometricPrompt.PromptInfo
 
+    private val appContainer by lazy { (application as WimApplication).container }
+
+    // Android crea y conserva los ViewModels (sobreviven a la rotación de pantalla)
+    private val factory by lazy {
+        viewModelFactory {
+            initializer { CandidataFormViewModel(appContainer.candidataRepository) }
+            initializer { CandidataListViewModel(appContainer.candidataRepository) }
+            initializer { EvaluacionViewModel(appContainer.candidataRepository) }
+            initializer { RankingHistorialViewModel(appContainer.candidataRepository) }
+        }
+    }
+    private val formViewModel: CandidataFormViewModel by viewModels { factory }
+    private val listViewModel: CandidataListViewModel by viewModels { factory }
+    private val evaluacionViewModel: EvaluacionViewModel by viewModels { factory }
+    private val rankingViewModel: RankingHistorialViewModel by viewModels { factory }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        val appContainer = (application as WimApplication).container
-        val formViewModel = CandidataFormViewModel(appContainer.candidataRepository)
-        val listViewModel = CandidataListViewModel(appContainer.candidataRepository)
-
         executor = ContextCompat.getMainExecutor(this)
 
         setContent {
-            MaterialTheme {
-                // Estado para saber si la app está bloqueada o desbloqueada
-                var estaAutenticado by remember { mutableStateOf(false) }
+            AppKotlinTheme {
+                // rememberSaveable: no vuelve a pedir la huella al rotar el celular
+                var estaAutenticado by rememberSaveable { mutableStateOf(false) }
 
-                // Configuramos la biometría y qué hacer cuando sea exitosa
-                ConfigurarBiometria { estaAutenticado = true }
+                // remember: la biometría se configura una sola vez, no en cada recomposición
+                remember { ConfigurarBiometria { estaAutenticado = true } }
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     if (!estaAutenticado) {
-                        // Muestra la pantalla de bloqueo
-                        PantallaBloqueo(
-                            onAutenticarClick = { mostrarPromptBiometrico() }
-                        )
+                        PantallaBloqueo(onAutenticarClick = { mostrarPromptBiometrico() })
                     } else {
-                        // Muestra tu aplicación normal
-                        var pantallaActual by remember { mutableStateOf("lista") }
-
-                        when (pantallaActual) {
-                            "lista" -> {
-                                CandidataListScreen(
-                                    viewModel = listViewModel,
-                                    onAgregarClick = {
-                                        formViewModel.limpiarFormulario()
-                                        pantallaActual = "formulario"
-                                    },
-                                    onEditarClick = { candidataSeleccionada ->
-                                        formViewModel.cargarCandidata(candidataSeleccionada) // Carga los datos existentes
-                                        pantallaActual = "formulario" // Abre el form
-                                    }
-                                )
-                            }
-                            "formulario" -> {
-                                CandidataFormScreen(
-                                    viewModel = formViewModel,
-                                    onVolver = {
-                                        formViewModel.limpiarFormulario()
-                                        pantallaActual = "lista"
-                                    }
-                                )
-                            }
-                        }
+                        WimApp(
+                            formViewModel = formViewModel,
+                            listViewModel = listViewModel,
+                            evaluacionViewModel = evaluacionViewModel,
+                            rankingViewModel = rankingViewModel
+                        )
                     }
                 }
             }
