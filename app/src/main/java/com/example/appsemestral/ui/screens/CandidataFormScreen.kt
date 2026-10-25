@@ -1,5 +1,11 @@
 package com.example.appsemestral.ui.screens
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
@@ -81,8 +87,13 @@ fun CandidataFormScreen(
 
             CampoValidado(
                 valor = nombreState.valor,
-                onValorChange = { viewModel.onNombreChange(it) },
-                label = "Nombre Completo (Ej: Ana Pérez)",
+                onValorChange = { nuevoValor ->
+                    // Se añade ´ y ¨ al final de los corchetes
+                    if (nuevoValor.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\\s´¨]*$"))) {
+                        viewModel.onNombreChange(nuevoValor)
+                    }
+                },
+                label = "Nombre",
                 error = nombreState.error
             )
 
@@ -95,9 +106,15 @@ fun CandidataFormScreen(
 
             CampoValidado(
                 valor = telefonoState.valor,
-                onValorChange = { viewModel.onTelefonoChange(it) },
-                label = "Teléfono (+56 9 XXXX XXXX)",
-                error = telefonoState.error
+                onValorChange = { nuevoValor ->
+                    if (nuevoValor.length <= 8 && nuevoValor.all { it.isDigit() }) {
+                        viewModel.onTelefonoChange(nuevoValor)
+                    }
+                },
+                label = "Teléfono",
+                error = telefonoState.error,
+                visualTransformation = TelefonoVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
             CampoValidado(
@@ -189,3 +206,29 @@ fun CandidataFormScreen(
     }
 }
 
+class TelefonoVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        var out = "+56 9 "
+        for (i in text.indices) {
+            out += text[i]
+            if (i == 3) out += " "
+        }
+
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                if (offset <= 0) return 6
+                if (offset <= 4) return 6 + offset
+                if (offset <= 8) return 7 + offset
+                return 15
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                if (offset <= 6) return 0
+                if (offset <= 10) return offset - 6
+                if (offset <= 15) return offset - 7
+                return 8
+            }
+        }
+        return TransformedText(AnnotatedString(out), offsetMapping)
+    }
+}

@@ -9,16 +9,19 @@ sealed class ValidationResult {
 object CandidataValidator {
 
     fun validarNombre(nombre: String): ValidationResult {
+        val regexNombre = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$".toRegex()
+
         return when {
-            nombre.isBlank() -> ValidationResult.Error("El nombre no puede estar vacío")
+            nombre.isBlank() -> ValidationResult.Error("El nombre no puede estar vacio")
             nombre.length < 3 -> ValidationResult.Error("Debe tener al menos 3 caracteres")
+            !nombre.matches(regexNombre) -> ValidationResult.Error("Solo se permiten letras y espacios")
             else -> ValidationResult.Valido
         }
     }
 
     fun validarCorreo(correo: String): ValidationResult {
         // Expresión regular estándar para correos generales (Gmail, Duoc, etc.)
-        val regexCorreo = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}\$".toRegex()
+        val regexCorreo = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$".toRegex()
 
         return when {
             correo.isBlank() -> ValidationResult.Error("El correo no puede estar vacío")
@@ -28,10 +31,12 @@ object CandidataValidator {
     }
 
     fun validarTelefono(telefono: String): ValidationResult {
-        val regex = Regex("^\\+56 9 \\d{4} \\d{4}$")
-        if (!regex.matches(telefono)) {
-            return ValidationResult.Error("Formato inválido (Ej: +56 9 XXXX XXXX)")
+        // Solo validamos que sean exactamente 8 dígitos
+        val regex = Regex("^\\d{8}$")
+        return if (regex.matches(telefono)) {
+            ValidationResult.Valido
+        } else {
+            ValidationResult.Error("Debe contener 8 dígitos")
         }
-        return ValidationResult.Valido
     }
 }

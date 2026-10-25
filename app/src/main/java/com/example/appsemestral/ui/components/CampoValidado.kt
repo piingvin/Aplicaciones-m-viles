@@ -1,5 +1,7 @@
 package com.example.appsemestral.ui.components
 
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -27,9 +29,11 @@ fun CampoValidado(
     onValorChange: (String) -> Unit,
     label: String,
     error: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
-    // Guarda el último error para que el texto no desaparezca de golpe mientras sale animado
+    // Guarda el último error para que el texto no desaparezca de golpe
     val ultimo = remember { UltimoMensaje() }
     if (error != null) ultimo.texto = error
     val esValido = error == null && valor.isNotBlank()
@@ -39,6 +43,9 @@ fun CampoValidado(
         onValueChange = onValorChange,
         label = { Text(label) },
         isError = error != null,
+        visualTransformation = visualTransformation,
+        keyboardOptions = keyboardOptions,
+        modifier = modifier.fillMaxWidth(),
         supportingText = {
             AnimatedVisibility(
                 visible = error != null,
@@ -68,7 +75,6 @@ fun CampoValidado(
                     )
                 }
             }
-        },
-        modifier = modifier.fillMaxWidth()
+        }
     )
 }
